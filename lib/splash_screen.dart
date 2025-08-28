@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:get/get.dart';
 import 'login_screen.dart';
 import 'home_screen.dart';
 
@@ -20,19 +21,12 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void _navigate() async {
     await Future.delayed(const Duration(seconds: 2));
-
     User? user = FirebaseAuth.instance.currentUser;
 
     if (user != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
+      Get.offAll(() => const HomeScreen());
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
+      Get.offAll(() => const LoginScreen());
     }
   }
 
@@ -43,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [Color(0xFF008080), Color(0xFF20B2AA)], // 🌊 Teal gradient
+            colors: [Color(0xFF008080), Color(0xFF20B2AA)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -52,52 +46,31 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // App Logo/Icon
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.15),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.edit_note,
-                  size: 100,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.edit_note, size: 100, color: Colors.white),
               ),
               const SizedBox(height: 30),
-
-              // App Name
               const Text(
                 "Notenest",
                 style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 1.5,
+                  fontSize: 32, fontWeight: FontWeight.bold,
+                  color: Colors.white, letterSpacing: 1.5,
                 ),
               ),
               const SizedBox(height: 10),
               const Text(
                 "Organize your thoughts with ease",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
-                  fontStyle: FontStyle.italic,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.white70, fontStyle: FontStyle.italic),
               ),
               const SizedBox(height: 40),
-
-              // Loading Indicator
-              const CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 3,
-              ),
+              const CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
               const SizedBox(height: 12),
-              const Text(
-                "Loading...",
-                style: TextStyle(color: Colors.white70, fontSize: 16),
-              ),
+              const Text("Loading...", style: TextStyle(color: Colors.white70, fontSize: 16)),
             ],
           ),
         ),

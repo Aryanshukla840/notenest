@@ -3,18 +3,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:get/get.dart';
 import 'login_screen.dart';
-import 'notes_scrren.dart'; // Make sure file name is correct
+import 'notes_scrren.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  void _logout(BuildContext context) async {
+  void _logout() async {
     await FirebaseAuth.instance.signOut();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-    );
+    Get.offAll(() => const LoginScreen());
+    Get.snackbar("Logout", "You have been logged out",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white);
   }
 
   void _shareApp() {
@@ -28,7 +30,10 @@ class HomeScreen extends StatelessWidget {
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
-      debugPrint('Could not launch $url');
+      Get.snackbar("Error", "Could not launch $url",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white);
     }
   }
 
@@ -41,7 +46,7 @@ class HomeScreen extends StatelessWidget {
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF00897B), Color(0xFF004D40)], // teal shades
+          colors: [Color(0xFF00897B), Color(0xFF004D40)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -51,21 +56,14 @@ class HomeScreen extends StatelessWidget {
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
-          title: const Text(
-            'Notes App',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          titleSpacing: 0,
+          title: const Text('Notenest',
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           actions: [
             IconButton(
               icon: const Icon(Icons.logout, color: Colors.white, size: 28),
-              onPressed: () => _logout(context),
+              onPressed: _logout,
             ),
           ],
-          iconTheme: const IconThemeData(color: Colors.white),
         ),
         drawer: Drawer(
           child: Container(
@@ -77,19 +75,16 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             child: ListView(
-              padding: EdgeInsets.zero,
               children: <Widget>[
                 UserAccountsDrawerHeader(
                   accountName: Text(displayName),
                   accountEmail: Text(email),
                   currentAccountPicture: CircleAvatar(
                     backgroundColor: Colors.white,
-                    backgroundImage: user?.photoURL != null
-                        ? NetworkImage(user!.photoURL!)
-                        : null,
+                    backgroundImage:
+                    user?.photoURL != null ? NetworkImage(user!.photoURL!) : null,
                     child: user?.photoURL == null
-                        ? const Icon(Icons.person,
-                        size: 50, color: Colors.teal)
+                        ? const Icon(Icons.person, size: 50, color: Colors.teal)
                         : null,
                   ),
                   decoration: const BoxDecoration(
@@ -102,27 +97,18 @@ class HomeScreen extends StatelessWidget {
                 ),
                 ListTile(
                   leading: const Icon(Icons.share, color: Colors.white),
-                  title:
-                  const Text('Share App', style: TextStyle(color: Colors.white)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _shareApp();
-                  },
+                  title: const Text('Share App', style: TextStyle(color: Colors.white)),
+                  onTap: _shareApp,
                 ),
                 ListTile(
                   leading: const Icon(Icons.star_rate, color: Colors.white),
-                  title:
-                  const Text('Rate Us', style: TextStyle(color: Colors.white)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _rateUs();
-                  },
+                  title: const Text('Rate Us', style: TextStyle(color: Colors.white)),
+                  onTap: _rateUs,
                 ),
                 ListTile(
                   leading: const Icon(Icons.logout, color: Colors.white),
-                  title:
-                  const Text('Logout', style: TextStyle(color: Colors.white)),
-                  onTap: () => _logout(context),
+                  title: const Text('Logout', style: TextStyle(color: Colors.white)),
+                  onTap: _logout,
                 ),
               ],
             ),
@@ -137,7 +123,6 @@ class HomeScreen extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
-
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return const Center(
                   child: Text("No notes found.",
@@ -176,14 +161,15 @@ class HomeScreen extends StatelessWidget {
                           .collection('notes')
                           .doc(noteId)
                           .delete();
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Note deleted')),
-                      );
+                      Get.snackbar("Deleted", "Note removed",
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white);
                     } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Error deleting note: $e')),
-                      );
+                      Get.snackbar("Error", e.toString(),
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.redAccent,
+                          colorText: Colors.white);
                     }
                   },
                   child: Card(
@@ -194,33 +180,22 @@ class HomeScreen extends StatelessWidget {
                     ),
                     margin: const EdgeInsets.only(bottom: 16),
                     child: ListTile(
-                      title: Text(
-                        title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.black87,
-                        ),
-                      ),
+                      title: Text(title,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              color: Colors.black87)),
                       subtitle: Padding(
                         padding: const EdgeInsets.only(top: 8.0),
-                        child: Text(
-                          description,
-                          style: const TextStyle(fontSize: 15, color: Colors.black54),
-                        ),
+                        child: Text(description,
+                            style: const TextStyle(
+                                fontSize: 15, color: Colors.black54)),
                       ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => NotesScreen(
-                              title: title,
-                              description: description,
-                              noteId: noteId,
-                            ),
-                          ),
-                        );
-                      },
+                      onTap: () => Get.to(() => NotesScreen(
+                        title: title,
+                        description: description,
+                        noteId: noteId,
+                      )),
                     ),
                   ),
                 );
@@ -229,14 +204,7 @@ class HomeScreen extends StatelessWidget {
           },
         ),
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const NotesScreen(),
-              ),
-            );
-          },
+          onPressed: () => Get.to(() => const NotesScreen()),
           backgroundColor: Colors.teal,
           child: const Icon(Icons.add, color: Colors.white, size: 34),
         ),
